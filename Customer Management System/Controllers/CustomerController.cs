@@ -89,10 +89,10 @@ namespace Customer_Management_System.Controllers
                 return View("CustomerDetails", customer);
             }
 
-            //try
-            //{
+            try
+            {
                 customer.VerificationToken = GenerateVerificationToken();
-                customer.TokenExpiry = DateTime.UtcNow.AddHours(24);
+                customer.TokenExpiry = DateTime.UtcNow.AddHours(3);
 
             string emailToVerify = customer.ContactEmail;
                 await _customerRepo.AddAsync(customer);
@@ -117,19 +117,19 @@ namespace Customer_Management_System.Controllers
 
 
             return RedirectToAction(nameof(Index));
-            //}
-            //catch (SqlException)
-            //{
-            //    // Database-related issue
-            //    return View("DatabaseError");
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Error creating customer");
-            //    // Unexpected error
-            //    ModelState.AddModelError("", "An unexpected error occurred. Please try again later.");
-            //    return View("CustomerDetails", customer);
-            //}
+        }
+            catch (SqlException)
+            {
+                // Database-related issue
+                return View("DatabaseError");
+    }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating customer");
+                // Unexpected error
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again later.");
+                return View("CustomerDetails", customer);
+}
         }
 
         [HttpGet]
