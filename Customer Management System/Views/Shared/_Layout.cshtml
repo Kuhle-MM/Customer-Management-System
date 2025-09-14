@@ -74,34 +74,53 @@
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome from showing the default prompt
             e.preventDefault();
             deferredPrompt = e;
 
-            // Show a custom install button
-            const installBtn = document.createElement('div');
-            installBtn.innerHTML = `
-                <button id="installBtn" class="btn btn-primary me-2">Install CMS App</button>
-                <button id="closeBtn" class="btn btn-secondary">×</button>
-            `;
-            installBtn.className = "position-fixed bottom-0 end-0 m-3 d-flex";
-            document.body.appendChild(installBtn);
+            // Create the container
+            const promptContainer = document.createElement('div');
+            promptContainer.className = "position-fixed bottom-0 end-0 m-3 d-flex";
 
-            document.getElementById('installBtn').addEventListener('click', async () => {
+            // Create install button
+            const installBtn = document.createElement('button');
+            installBtn.textContent = "Install CMS App";
+            installBtn.className = "btn btn-primary me-2";
+
+            // Create close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = "×";
+            closeBtn.className = "btn btn-secondary";
+
+            // Append buttons
+            promptContainer.appendChild(installBtn);
+            promptContainer.appendChild(closeBtn);
+            document.body.appendChild(promptContainer);
+
+            // Install button click
+            installBtn.addEventListener('click', async () => {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`User response to install: ${outcome}`);
-                installBtn.style.display = 'none';
+                promptContainer.remove(); // fully remove container
                 deferredPrompt = null;
             });
 
-            document.getElementById('closeBtn').addEventListener('click', () => {
-                installBtn.style.display = 'none';
+            // Close button click
+            closeBtn.addEventListener('click', () => {
+                promptContainer.remove(); // fully remove container
             });
+        });
 
-
+        // Hide the UI if the app gets installed
+        window.addEventListener('appinstalled', () => {
+            console.log("App was installed");
+            const existingPrompt = document.querySelector('.position-fixed.bottom-0.end-0');
+            if (existingPrompt) {
+                existingPrompt.remove();
+            }
         });
     </script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
