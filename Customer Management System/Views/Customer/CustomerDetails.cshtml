@@ -1,0 +1,140 @@
+﻿@model Customer_Management_System.Models.Customer
+
+@{
+    var isEdit = ViewData["isEdit"] as bool? ?? false;
+    ViewData["Title"] = isEdit ? "Edit Customer Details" : "Add Customer Details";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<form asp-action="@(isEdit ? "Edit": "Create")" id="customerForm" class="row g-4" >
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <!-- Customer Details Section -->
+    <div class="col-12">
+        <h4 class="border-bottom pb-2">Customer Details</h4>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" placeholder="e.g. John Smith" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="VATNumber" class="form-label">
+            @Html.DisplayNameFor(m => m.VATNumber) (Optional)
+        </label>
+        <input asp-for="VATNumber" class="form-control" placeholder="e.g. 1234567890" />
+        <span asp-validation-for="VATNumber" class="text-danger"></span>
+    </div>
+
+    <!-- Contact Details Section -->
+    <div class="col-12 mt-4">
+        <h4 class="border-bottom pb-2">Contact Details (Optional)</h4>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="PhoneNumber" class="form-label">
+            @Html.DisplayNameFor(m => m.PhoneNumber) (Optional)
+        </label>
+        <input asp-for="PhoneNumber" class="form-control" placeholder="e.g. +27 82 123 4567" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ContactName" class="form-label">
+            @Html.DisplayNameFor(m => m.ContactName) (Optional)
+        </label>
+        <input asp-for="ContactName" class="form-control" placeholder="e.g. John Smith" />
+        <span asp-validation-for="ContactName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ContactEmail" class="form-label">
+            @Html.DisplayNameFor(m => m.ContactEmail) (Optional)
+        </label>
+        <input asp-for="ContactEmail" class="form-control" placeholder="e.g. john.smith@example.com" />
+        <span asp-validation-for="ContactEmail" class="text-danger"></span>
+    </div>
+
+    <!-- Address Section -->
+    <div class="col-12 mt-4">
+        <h4 class="border-bottom pb-2">Address</h4>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Address.StreetName" class="form-label"></label>
+        <input asp-for="Address.StreetName" class="form-control" placeholder="e.g. 123 Main Road" />
+        <span asp-validation-for="Address.StreetName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Address.Suburb" class="form-label"></label>
+        <input asp-for="Address.Suburb" class="form-control" placeholder="e.g. Parktown" />
+        <span asp-validation-for="Address.Suburb" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Address.City" class="form-label"></label>
+        <input asp-for="Address.City" class="form-control" placeholder="e.g. Johannesburg" />
+        <span asp-validation-for="Address.City" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Address.Province" class="form-label"></label>
+        <input asp-for="Address.Province" class="form-control" placeholder="e.g. Gauteng" />
+        <span asp-validation-for="Address.Province" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Address.PostalCode" class="form-label"></label>
+        <input asp-for="Address.PostalCode" class="form-control" placeholder="e.g. 2193" />
+        <span asp-validation-for="Address.PostalCode" class="text-danger"></span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="col-12 mt-4">
+        @if (isEdit)
+        {
+            <input type="hidden" asp-for="CustomerID" />
+        }
+        <button type="submit" class="btn btn-primary" >
+            @(isEdit ? "Save Changes" : "Create")
+        </button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Back to List</a>
+    </div>
+</form>
+
+@section Scripts {
+    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            $('#customerForm').submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+
+                if (form.valid()) {
+                    Swal.fire({
+                        title: '@(isEdit ? "Do you want to save changes?" : "Do you want to add the customer?")',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            form.off('submit'); // remove this handler to prevent recursion
+                            form.submit(); // finally submit
+                        }
+                    });
+                } else {
+                    form.valid(); // show validation errors
+                }
+            });
+        });
+
+
+        function successAdding(){
+                Swal.fire('Success', 'Successfully added', 'success')
+            }
+
+            function errorAdding(){
+                Swal.fire('Error', 'Error Adding', 'error')
+            }
+    </script>
+
+    
+}
+
