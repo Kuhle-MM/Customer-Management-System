@@ -19,7 +19,7 @@ namespace Customer_Management_System.Models
         [Required(ErrorMessage = "Address is Required")] 
         public Address Address { get; set; } //could make this a list if there is a need for multiple address
 
-        [NotMapped]
+        [NotMapped] // for display purposes combines the attributes of address
         public string FullAddress =>
             Address == null
                 ? string.Empty

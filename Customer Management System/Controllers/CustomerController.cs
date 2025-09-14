@@ -91,47 +91,51 @@ namespace Customer_Management_System.Controllers
 
             try
             {
+                //genereated verification token and sets and starts the expiration timer
                 customer.VerificationToken = GenerateVerificationToken();
                 customer.TokenExpiry = DateTime.UtcNow.AddHours(3);
 
-            string emailToVerify = customer.ContactEmail;
+                string emailToVerify = customer.ContactEmail;
                 await _customerRepo.AddAsync(customer);
 
-            _logger.LogInformation("Creating customer with email: {Email}", customer.ContactEmail);
+                _logger.LogInformation("Creating customer with email: {Email}", customer.ContactEmail);
 
-            if (string.IsNullOrWhiteSpace(emailToVerify))
-            {
-                _logger.LogWarning("Customer email is empty, skipping verification email.");
+                if (string.IsNullOrWhiteSpace(emailToVerify))
+                {
+                    _logger.LogWarning("Customer email is empty, skipping verification email.");
+                }
+                else
+                {
+                    //Creates Customer
+                    var verificationLink = Url.Action("VerifyEmail", "Customer",
+                        new { token = WebUtility.UrlEncode(customer.VerificationToken) }, Request.Scheme);
+
+                    await fluentEmail
+                       .To(customer.ContactEmail)
+                       .Subject("Verify your email")
+                       .Body($"Hello {customer.Name},\n\nPlease verify your email by clicking this link:\n{verificationLink}")
+                       .SendAsync();
+                }
+
+
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                var verificationLink = Url.Action("VerifyEmail", "Customer",
-                    new { token = WebUtility.UrlEncode(customer.VerificationToken) }, Request.Scheme);
-
-                await fluentEmail
-                   .To(customer.ContactEmail)
-                   .Subject("Verify your email")
-                   .Body($"Hello {customer.Name},\n\nPlease verify your email by clicking this link:\n{verificationLink}")
-                   .SendAsync();
-            }
-
-
-            return RedirectToAction(nameof(Index));
-        }
             catch (SqlException)
             {
                 // Database-related issue
                 return View("DatabaseError");
-    }
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating customer");
                 // Unexpected error
                 ModelState.AddModelError("", "An unexpected error occurred. Please try again later.");
                 return View("CustomerDetails", customer);
-}
+            }
         }
 
+
+        //Verifies the email by comparing the tokens from the database and the token that the contact is using from their email
         [HttpGet]
         public async Task<IActionResult> VerifyEmail(string token)
         {
@@ -154,6 +158,7 @@ namespace Customer_Management_System.Controllers
 
         }
 
+        //creates a token using random characters
         private string GenerateVerificationToken()
         {
             var tokenBytes = RandomNumberGenerator.GetBytes(64);
